@@ -170,3 +170,19 @@ func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 	duration := time.Duration(int64(blockTime * float64(time.Second)))
 	return duration, nil
 }
+
+func (rpc *RPC) GetProposedBlockAppHash() (string, error) {
+	var response types.DumpConsensusStateResponse
+	if err := rpc.Client.Get("/dump_consensus_state", &response); err != nil {
+		return "", err
+	}
+
+	if response.Result == nil ||
+		response.Result.RoundState == nil ||
+		response.Result.RoundState.ProposalBlock == nil {
+		rpc.Logger.Debug().Msg("No proposed block available")
+		return "", nil
+	}
+
+	return response.Result.RoundState.ProposalBlock.Header.AppHash, nil
+}

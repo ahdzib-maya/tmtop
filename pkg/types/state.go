@@ -18,6 +18,8 @@ type State struct {
 	StartTime                    time.Time
 	Upgrade                      *Upgrade
 	BlockTime                    time.Duration
+	ProposedBlockHash            string
+	AppHash                      string
 
 	ConsensusStateError  error
 	ValidatorsError      error
@@ -48,6 +50,12 @@ func (s *State) SetTendermintResponse(
 	s.Round = utils.MustParseInt64(hrsSplit[1])
 	s.Step = utils.MustParseInt64(hrsSplit[2])
 	s.StartTime = consensus.Result.RoundState.StartTime
+
+	// Extract proposed block hash if available
+	if consensus.Result.RoundState.Proposal != nil &&
+		consensus.Result.RoundState.Proposal.BlockID != nil {
+		s.ProposedBlockHash = consensus.Result.RoundState.Proposal.BlockID.Hash
+	}
 
 	validators, err := ValidatorsWithLatestRoundFromTendermintResponse(consensus, tendermintValidators, s.Round)
 	if err != nil {
@@ -80,6 +88,10 @@ func (s *State) SetUpgrade(upgrade *Upgrade) {
 
 func (s *State) SetBlockTime(blockTime time.Duration) {
 	s.BlockTime = blockTime
+}
+
+func (s *State) SetAppHash(appHash string) {
+	s.AppHash = appHash
 }
 
 func (s *State) SetConsensusStateError(err error) {
@@ -115,6 +127,19 @@ func (s *State) SerializeConsensus(timezone *time.Location) string {
 		utils.ZeroOrPositiveDuration(utils.SerializeDuration(time.Since(s.StartTime))),
 		utils.SerializeTime(s.StartTime.In(timezone)),
 	))
+
+	// Display app_hash (truncated)
+	appHashDisplay := "N/A"
+	if s.AppHash != "" {
+		// Truncate to show first 6 and last 6 characters
+		if len(s.AppHash) > 12 {
+			appHashDisplay = s.AppHash[:6] + "..." + s.AppHash[len(s.AppHash)-6:]
+		} else {
+			appHashDisplay = s.AppHash
+		}
+	}
+	sb.WriteString(fmt.Sprintf(" app_hash: %s\n", appHashDisplay))
+
 	sb.WriteString(fmt.Sprintf(
 		" prevote consensus (total/agreeing): %.2f / %.2f\n",
 		s.Validators.GetTotalVotingPowerPrevotedPercent(true),

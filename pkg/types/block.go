@@ -15,6 +15,7 @@ type TendermintBlock struct {
 }
 
 type TendermintBlockHeader struct {
-	Height string    `json:"height"`
-	Time   time.Time `json:"time"`
+	Height  string    `json:"height"`
+	Time    time.Time `json:"time"`
+	AppHash string    `json:"app_hash"`
 }

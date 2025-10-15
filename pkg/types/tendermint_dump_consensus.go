@@ -9,8 +9,19 @@ type DumpConsensusStateResult struct {
 }
 
 type DumpConsensusStateRoundState struct {
-	Validators DumpConsensusStateRoundStateValidators `json:"validators"`
+	Validators    DumpConsensusStateRoundStateValidators `json:"validators"`
+	ProposalBlock *DumpConsensusProposalBlock            `json:"proposal_block"`
 }
+
 type DumpConsensusStateRoundStateValidators struct {
 	Validators []TendermintValidator `json:"validators"`
+}
+
+type DumpConsensusProposalBlock struct {
+	Header DumpConsensusProposalBlockHeader `json:"header"`
+}
+
+type DumpConsensusProposalBlockHeader struct {
+	Height  string `json:"height"`
+	AppHash string `json:"app_hash"`
 }

@@ -97,7 +97,15 @@ func (a *App) RefreshConsensus() {
 		return
 	}
 
-	a.State.SetConsensusStateError(err)
+	// Fetch app_hash from the proposed block
+	appHash, err := a.Aggregator.GetAppHash()
+	if err != nil {
+		a.Logger.Debug().Err(err).Msg("Could not get app hash from proposed block")
+	} else if appHash != "" {
+		a.Logger.Debug().Str("app_hash", appHash).Msg("Got app_hash from proposed block")
+		a.State.SetAppHash(appHash)
+	}
+
 	a.DisplayWrapper.SetState(a.State)
 }
 

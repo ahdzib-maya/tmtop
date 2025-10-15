@@ -17,10 +17,12 @@ type Validator struct {
 type Validators []Validator
 
 type RoundVote struct {
-	Address    string
-	Prevote    Vote
-	Precommit  Vote
-	IsProposer bool
+	Address            string
+	Prevote            Vote
+	PrevoteBlockHash   string
+	Precommit          Vote
+	PrecommitBlockHash string
+	IsProposer         bool
 }
 
 func (v RoundVote) Equals(other RoundVote) bool {
@@ -32,7 +34,15 @@ func (v RoundVote) Equals(other RoundVote) bool {
 		return false
 	}
 
+	if v.PrevoteBlockHash != other.PrevoteBlockHash {
+		return false
+	}
+
 	if v.Precommit != other.Precommit {
+		return false
+	}
+
+	if v.PrecommitBlockHash != other.PrecommitBlockHash {
 		return false
 	}
 
@@ -138,14 +148,34 @@ func (v ValidatorWithInfo) Serialize(disableEmojis bool) string {
 		}
 	}
 
+	// Format block hashes: show first 3 chars, "nil" for empty, "000" for nil block
+	prevoteHash := formatBlockHash(v.RoundVote.PrevoteBlockHash)
+	precommitHash := formatBlockHash(v.RoundVote.PrecommitBlockHash)
+
 	return fmt.Sprintf(
-		" %s %s %s %s%% %s ",
+		" %s%s %s%s %s %s%% %s ",
 		v.RoundVote.Prevote.Serialize(disableEmojis),
+		prevoteHash,
 		v.RoundVote.Precommit.Serialize(disableEmojis),
+		precommitHash,
 		utils.RightPadAndTrim(strconv.Itoa(v.Validator.Index+1), 3),
 		utils.RightPadAndTrim(fmt.Sprintf("%.2f", v.Validator.VotingPowerPercent), 6),
 		utils.LeftPadAndTrim(name, 25),
 	)
+}
+
+// formatBlockHash truncates block hash to first 3 chars
+func formatBlockHash(hash string) string {
+	if hash == "" {
+		return "nil"
+	}
+	if hash == "000000000000" {
+		return "000"
+	}
+	if len(hash) >= 3 {
+		return hash[:3]
+	}
+	return hash
 }
 
 type ValidatorsWithInfo []ValidatorWithInfo

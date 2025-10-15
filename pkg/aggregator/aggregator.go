@@ -83,3 +83,7 @@ func (a *Aggregator) GetUpgrade() (*types.Upgrade, error) {
 func (a *Aggregator) GetBlockTime() (time.Duration, error) {
 	return a.TendermintClient.GetBlockTime()
 }
+
+func (a *Aggregator) GetAppHash() (string, error) {
+	return a.TendermintClient.GetProposedBlockAppHash()
+}

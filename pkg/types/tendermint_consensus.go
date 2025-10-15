@@ -17,6 +17,7 @@ type ConsensusStateRoundState struct {
 	StartTime       time.Time                `json:"start_time"`
 	HeightVoteSet   []ConsensusHeightVoteSet `json:"height_vote_set"`
 	Proposer        ConsensusStateProposer   `json:"proposer"`
+	Proposal        *ConsensusProposal       `json:"proposal"`
 }
 
 type ConsensusHeightVoteSet struct {
@@ -30,6 +31,22 @@ type ConsensusHeightVoteSet struct {
 type ConsensusStateProposer struct {
 	Address string `json:"address"`
 	Index   int    `json:"index"`
+}
+
+type ConsensusProposal struct {
+	Height  string       `json:"height"`
+	Round   int          `json:"round"`
+	BlockID *BlockID     `json:"block_id"`
+}
+
+type BlockID struct {
+	Hash  string        `json:"hash"`
+	Parts *BlockIDParts `json:"parts"`
+}
+
+type BlockIDParts struct {
+	Total int    `json:"total"`
+	Hash  string `json:"hash"`
 }
 
 type ConsensusVote string
